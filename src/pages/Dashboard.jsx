@@ -15,7 +15,7 @@ import {
   Line,
   CartesianGrid,
 } from "recharts";
-const socket = io("http://localhost:5000");
+const socket = io("https://news-ai-agent-server.vercel.app");
 
 const COLORS = [
   "#2563eb",
