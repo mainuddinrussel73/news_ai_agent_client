@@ -15,7 +15,7 @@ import {
   Line,
   CartesianGrid,
 } from "recharts";
-const socket = io("https://news-ai-agent-server.vercel.app");
+const socket = io("https://news-ai-agent-server.onrender.com");
 
 const COLORS = [
   "#2563eb",
@@ -77,7 +77,7 @@ const filteredArticles = articles.filter((a) => {
     async function loadNews() {
        try {
         const res = await axios.post(
-          "https://news-ai-agent-server.vercel.app/api/crawl",
+          "https://news-ai-agent-server.onrender.com/api/crawl",
           {
             
           }
