@@ -779,10 +779,14 @@ color: darkMode ? "#e5e7eb" : "#000",
     .map((para, i) => (
       <p
         key={i}
-        style={{
-          marginBottom: 26,
-          textIndent: "18px",
-        }}
+      style={{
+        marginBottom: 26,
+        textIndent: "18px",
+        ...(i === 0 && {
+          fontSize: fontSize + 2,
+          fontWeight: 500,
+        }),
+      }}
       >
         {para.trim()}.
       </p>
