@@ -737,25 +737,57 @@ color: darkMode ? "#e5e7eb" : "#000",
         )}
 
         {/* ARTICLE CONTENT (PRESERVES PARAGRAPH GAP) */}
-        <div style={{
-            background: darkMode ? "#0f172a" : "#fff",
-          fontSize :fontSize || 18,
-            lineHeight: 2.1,
-          color: "#1e293b",
-          marginBottom: 40
-        }}>
-          {selected.content
-            ?.split(/\n|\.\s+/)
-            .filter(Boolean)
-            .map((para, i) => (
-              <p key={i} style={{
-                marginBottom: 28,
-                textAlign: "justify"
-              }}>
-                {para}
-              </p>
-            ))}
-        </div>
+       {/* ================= KINDLE READER MODE ================= */}
+<div
+  id="reader-content"
+  style={{
+    background: darkMode ? "#0b1220" : "#faf7f2",
+    color: darkMode ? "#e5e7eb" : "#1a1a1a",
+    padding: "40px 36px",
+    borderRadius: 14,
+    fontFamily:
+      "Georgia, 'Times New Roman', serif",
+    fontSize: fontSize || 19,
+    lineHeight: 2.05,
+    letterSpacing: "0.2px",
+    textAlign: "justify",
+    maxHeight: "70vh",
+    overflowY: "auto",
+    boxShadow: darkMode
+      ? "inset 0 0 0 1px #1f2937"
+      : "inset 0 0 0 1px #e5e7eb",
+  }}
+>
+
+  {/* READING PULSE HEADER */}
+  <div
+    style={{
+      fontSize: 12,
+      opacity: 0.6,
+      marginBottom: 20,
+      letterSpacing: 1,
+      textTransform: "uppercase",
+    }}
+  >
+    📖 Reading Mode
+  </div>
+
+  {/* ARTICLE PARAGRAPHS */}
+  {selected.content
+    ?.split(/\n|\.\s+/)
+    .filter(Boolean)
+    .map((para, i) => (
+      <p
+        key={i}
+        style={{
+          marginBottom: 26,
+          textIndent: "18px",
+        }}
+      >
+        {para.trim()}.
+      </p>
+    ))}
+</div>
 
         {/* ================= AI SECTION ================= */}
         {selected?.ai ? (
