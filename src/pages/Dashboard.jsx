@@ -15,8 +15,11 @@ import {
   Line,
   CartesianGrid,
 } from "recharts";
-const socket = io("https://property-recycling-exes.ngrok-free.dev");
-
+const socket = io("https://property-recycling-exes.ngrok-free.dev", {
+  transports: ["websocket"],
+  secure: true,
+  reconnection: true
+});
 const COLORS = [
   "#2563eb",
   "#16a34a",
