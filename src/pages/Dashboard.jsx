@@ -76,7 +76,7 @@ const filteredArticles = articles.filter((a) => {
   useEffect(() => {
     async function loadNews() {
        try {
-        const res = await axios.post(
+        const res = await axios.get(
           "https://property-recycling-exes.ngrok-free.dev/api/crawl",
           {
             
