@@ -635,7 +635,7 @@ const grouped = useMemo(() => {
       backdropFilter: "blur(6px)",
       zIndex: 9999,
       overflowY: "auto",
-      padding: "40px 16px",
+      padding: "40px 16px"
     }}
   >
     <div
@@ -645,11 +645,11 @@ const grouped = useMemo(() => {
         maxWidth: 820,
         margin: "0 auto",
         background: darkMode ? "#0f172a" : "#fff",
-        color: darkMode ? "#e5e7eb" : "#111827",
+color: darkMode ? "#e5e7eb" : "#000",
         borderRadius: 22,
         overflow: "hidden",
         boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
-        position: "relative",
+        position: "relative"
       }}
     >
 
@@ -664,12 +664,12 @@ const grouped = useMemo(() => {
           height: 38,
           borderRadius: "50%",
           border: "none",
-          background: darkMode ? "#1f2937" : "rgba(255,255,255,0.9)",
-          color: darkMode ? "#fff" : "#000",
+          background: "rgba(255,255,255,0.9)",
           cursor: "pointer",
           fontSize: 18,
           fontWeight: 700,
-          zIndex: 10,
+          boxShadow: "0 2px 10px rgba(0,0,0,0.15)",
+          zIndex: 10
         }}
       >
         ✕
@@ -683,7 +683,7 @@ const grouped = useMemo(() => {
           style={{
             width: "100%",
             height: 320,
-            objectFit: "cover",
+            objectFit: "cover"
           }}
         />
       )}
@@ -691,33 +691,29 @@ const grouped = useMemo(() => {
       <div style={{ padding: "32px" }}>
 
         {/* TITLE */}
-        <h1
-          style={{
-            fontSize: 30,
-            lineHeight: 1.35,
-            marginBottom: 18,
-            fontWeight: 700,
-          }}
-        >
+        <h1 style={{
+          fontSize: 30,
+          lineHeight: 1.35,
+          marginBottom: 18,
+          color: "#0f172a",
+          fontWeight: 700
+        }}>
           {selected.title}
         </h1>
 
         {/* META */}
-        <div
-          style={{
-            display: "flex",
-            gap: 12,
-            flexWrap: "wrap",
-            marginBottom: 28,
-            fontSize: 13,
-            color: darkMode ? "#94a3b8" : "#64748b",
-          }}
-        >
+        <div style={{
+          display: "flex",
+          gap: 12,
+          flexWrap: "wrap",
+          marginBottom: 28,
+          fontSize: 13,
+          color: "#64748b"
+        }}>
           <span>📰 {selected.site || "News"}</span>
           <span>📂 {selected.section}</span>
           <span>
-            🕒{" "}
-            {selected.date
+            🕒 {selected.date
               ? new Date(selected.date).toLocaleString()
               : ""}
           </span>
@@ -725,93 +721,234 @@ const grouped = useMemo(() => {
 
         {/* SUMMARY */}
         {selected.summary && (
-          <div
-            style={{
-              background: darkMode ? "#111827" : "#f8fafc",
-              borderLeft: "4px solid #2563eb",
-              padding: "18px 20px",
-              borderRadius: 12,
-              marginBottom: 30,
-              fontSize: 16,
-              lineHeight: 1.8,
-            }}
-          >
+          <div style={{
+            background: darkMode ? "#0f172a" : "#fff",
+color: darkMode ? "#e5e7eb" : "#000",
+            borderLeft: "4px solid #2563eb",
+            padding: "18px 20px",
+            borderRadius: 12,
+            marginBottom: 36,
+            fontSize: 17,
+            lineHeight: 1.9,
+            color: "#334155"
+          }}>
             {selected.summary}
           </div>
         )}
 
-        {/* ARTICLE CONTENT */}
-        <div
-          style={{
-            fontSize: fontSize || 18,
+        {/* ARTICLE CONTENT (PRESERVES PARAGRAPH GAP) */}
+        <div style={{
+            background: darkMode ? "#0f172a" : "#fff",
+          fontSize :fontSize || 18,
             lineHeight: 2.1,
-            color: darkMode ? "#e5e7eb" : "#1e293b",
-            marginBottom: 40,
-            textAlign: "justify",
-          }}
-        >
+          color: "#1e293b",
+          marginBottom: 40
+        }}>
           {selected.content
             ?.split(/\n|\.\s+/)
             .filter(Boolean)
             .map((para, i) => (
-              <p
-                key={i}
-                style={{
-                  marginBottom: 24,
-                }}
-              >
-                {para}.
+              <p key={i} style={{
+                marginBottom: 28,
+                textAlign: "justify"
+              }}>
+                {para}
               </p>
             ))}
         </div>
 
         {/* ================= AI SECTION ================= */}
         {selected?.ai ? (
-          <div
-            style={{
-              borderTop: darkMode
-                ? "1px solid #1f2937"
-                : "1px solid #e2e8f0",
-              paddingTop: 30,
-            }}
-          >
-            <h2 style={{ fontSize: 24, marginBottom: 20 }}>
+          <div style={{
+            borderTop: "1px solid #e2e8f0",
+            paddingTop: 30
+          }}>
+
+            <h2 style={{ fontSize: 26, marginBottom: 24 }}>
               🧠 AI Intelligence
             </h2>
 
-            <div style={{ marginBottom: 30 }}>
-              <h3>Summary</h3>
-              <p style={{ lineHeight: 1.8 }}>
+            {/* SUMMARY */}
+            <div style={{ marginBottom: 40 }}>
+              <h3 style={{ fontSize: 20, marginBottom: 14 }}>
+                Executive Summary
+              </h3>
+
+              <div style={{
+                background: "#f8fafc",
+                padding: 22,
+                borderRadius: 14,
+                lineHeight: 1.9,
+                fontSize: 16
+              }}>
                 {selected.ai.summary}
-              </p>
+              </div>
             </div>
 
+            {/* KEY POINTS */}
             {selected.ai.key_points?.length > 0 && (
-              <div>
-                <h3>Key Points</h3>
-                <ul style={{ lineHeight: 2 }}>
+              <div style={{ marginBottom: 40 }}>
+                <h3 style={{ fontSize: 20, marginBottom: 18 }}>
+                  📌 Key Points
+                </h3>
+                <ul style={{ paddingLeft: 24, lineHeight: 2 }}>
                   {selected.ai.key_points.map((k, i) => (
+                    <li key={i} style={{ marginBottom: 12 }}>{k}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* CAUSES */}
+            {selected.ai.causes?.length > 0 && (
+              <div style={{ marginBottom: 40 }}>
+                <h3 style={{ fontSize: 20, marginBottom: 18 }}>
+                  ⚠ Causes
+                </h3>
+                <ul style={{ paddingLeft: 24, lineHeight: 2 }}>
+                  {selected.ai.causes.map((k, i) => (
                     <li key={i}>{k}</li>
                   ))}
                 </ul>
               </div>
             )}
+
+            {/* IMPACTS */}
+            {selected.ai.impacts?.length > 0 && (
+              <div style={{ marginBottom: 40 }}>
+                <h3 style={{ fontSize: 20, marginBottom: 18 }}>
+                  📉 Impacts
+                </h3>
+                <ul style={{ paddingLeft: 24, lineHeight: 2 }}>
+                  {selected.ai.impacts.map((k, i) => (
+                    <li key={i}>{k}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* POLICY */}
+            {selected.ai.policy_implications?.length > 0 && (
+              <div style={{ marginBottom: 40 }}>
+                <h3 style={{ fontSize: 20, marginBottom: 18 }}>
+                  🏛 Policy Implications
+                </h3>
+                <ul style={{ paddingLeft: 24, lineHeight: 2 }}>
+                  {selected.ai.policy_implications.map((k, i) => (
+                    <li key={i}>{k}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* TIMELINE */}
+           {selected.ai.timeline?.map((t, i) => {
+
+  return (
+    <div
+      key={i}
+      style={{
+        padding: 16,
+        borderRadius: 12,
+        background: "#f8fafc",
+        marginBottom: 12
+      }}
+    >
+      <strong>{t.text}</strong>
+      <div style={{ marginTop: 6 }}>
+        {t.time}
+      </div>
+    </div>
+  );
+})}
+
+{selected.ai.statistics?.length > 0 && (
+  <div style={{ marginBottom: 40 }}>
+    <h3 style={{ fontSize: 20, marginBottom: 18 }}>
+      📊 Statistics
+    </h3>
+
+    <div style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+      gap: 16
+    }}>
+      {normalizeStatistics(selected.ai.statistics).map((s, i) => (
+        <div
+          key={i}
+          style={{
+            background: "#f8fafc",
+            padding: 16,
+            borderRadius: 12
+          }}
+        >
+          <div style={{ fontWeight: 600 }}>
+            {s.name}
+          </div>
+
+          <div style={{ marginTop: 6 }}>
+            {typeof s.value === "object"
+              ? JSON.stringify(s.value)
+              : String(s.value)}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+            {/* ENTITIES */}
+            <div style={{ marginBottom: 40 }}>
+              <h3 style={{ fontSize: 20, marginBottom: 18 }}>
+                🌍 Entities
+              </h3>
+
+              <p><b>Countries:</b> {selected.ai.entities?.countries?.join(", ")}</p>
+              <p><b>Organizations:</b> {selected.ai.entities?.organizations?.join(", ")}</p>
+              <p><b>People:</b> {selected.ai.entities?.people?.join(", ")}</p>
+            </div>
+
           </div>
         ) : (
           <div>
             {loadingAI ? (
-              <div style={infoBox}>
-                ⏳ AI analyzing article...
-              </div>
-            ) : aiError ? (
-              <div style={errorBox}>
-                ⚠ AI analysis failed
-              </div>
-            ) : (
-              <div style={infoBox}>
-                ℹ AI analysis will appear after processing
-              </div>
-            )}
+  <div
+    style={{
+      padding: 20,
+      background: "#f8fafc",
+      borderRadius: 12,
+      textAlign: "center",
+      fontSize: 15,
+      color: "#334155"
+    }}
+  >
+    ⏳ Analyzing article with AI... please wait
+  </div>
+) : aiError ? (
+  <div
+    style={{
+      padding: 20,
+      background: "#fff1f2",
+      borderRadius: 12,
+      color: "#be123c",
+      fontSize: 15
+    }}
+  >
+    ⚠ AI analysis failed. Please try again later.
+  </div>
+) : !selected?.ai ? (
+  <div
+    style={{
+      padding: 20,
+      background: "#f1f5f9",
+      borderRadius: 12,
+      color: "#475569",
+      fontSize: 15
+    }}
+  >
+    ℹ AI analysis will appear after processing this article.
+  </div>
+) : null} 
+            
           </div>
         )}
 
@@ -822,13 +959,14 @@ const grouped = useMemo(() => {
           rel="noreferrer"
           style={{
             display: "inline-block",
-            marginTop: 20,
+            marginTop: 10,
             color: "#2563eb",
-            fontWeight: 600,
+            fontWeight: 600
           }}
         >
           🔗 Read Full Article
         </a>
+
       </div>
     </div>
   </div>
@@ -837,19 +975,3 @@ const grouped = useMemo(() => {
     </div>
   );
 }
-
-const infoBox = {
-  padding: 16,
-  background: "#f1f5f9",
-  borderRadius: 10,
-  color: "#334155",
-  fontSize: 14,
-};
-
-const errorBox = {
-  padding: 16,
-  background: "#fff1f2",
-  borderRadius: 10,
-  color: "#be123c",
-  fontSize: 14,
-};
