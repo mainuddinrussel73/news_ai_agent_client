@@ -490,10 +490,14 @@ const grouped = useMemo(() => {
   >
     <option value="all">All Papers</option>
     <option value="prothomalo">Prothom Alo</option>
-    <option value="thedailystar">Daily Star</option>
+    <option value="bbc">BBC</option>
+    <option value="bdnews24">Bdnews24</option>
+    <option value="kalbela">Kalbela</option>
+    <option value="newagebangladesh">New Age</option>
+    <option value="dailystarbangladesh">Daily Star</option>
     <option value="jugantor">Jugantor</option>
     <option value="ittefaq">Ittefaq</option>
-    <option value="businessstandard">Business Standard</option>
+    <option value="thebusinessstandard">Business Standard</option>
   </select>
 
   {/* FROM DATE */}
