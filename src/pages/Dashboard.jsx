@@ -642,7 +642,7 @@ const grouped = useMemo(() => {
       onClick={(e) => e.stopPropagation()}
       style={{
         width: "100%",
-        maxWidth: 820,
+  maxWidth: 1100,
         margin: "0 auto",
         background: darkMode ? "#0f172a" : "#fff",
 color: darkMode ? "#e5e7eb" : "#000",
@@ -741,20 +741,22 @@ color: darkMode ? "#e5e7eb" : "#000",
 <div
   id="reader-content"
   style={{
-    background: darkMode ? "#0b1220" : "#faf7f2",
-    color: darkMode ? "#e5e7eb" : "#1a1a1a",
+     background: darkMode ? "#0b1220" : "#faf7f2",
+  color: darkMode ? "#e5e7eb" : "#1a1a1a",
 
-    /* 🔥 KEY CHANGE: wider layout */
-    padding: "50px 70px",
-    maxWidth: "100%",
-    width: "100%",
+  /* ✅ KEY FIX: controlled reading column */
+  maxWidth: "900px",
+  margin: "0 auto",
 
-    /* 🔥 NO INTERNAL SCROLL */
-    overflow: "visible",
-    maxHeight: "none",
+  /* balanced padding (not breaking modal) */
+  padding: "40px 48px",
 
-    fontFamily: "Georgia, 'Times New Roman', serif",
-    fontSize: fontSize || 19,
+  /* IMPORTANT: let modal handle scroll */
+  overflow: "visible",
+  maxHeight: "none",
+
+  fontFamily: "Georgia, 'Times New Roman', serif",
+  fontSize: fontSize || 18,
     lineHeight: 2.1,
     letterSpacing: "0.2px",
     textAlign: "justify",
