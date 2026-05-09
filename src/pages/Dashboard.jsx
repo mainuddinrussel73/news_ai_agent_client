@@ -79,7 +79,9 @@ const filteredArticles = articles.filter((a) => {
         const res = await axios.get(
           "https://property-recycling-exes.ngrok-free.dev/api/crawl",
           {
-            
+            headers: {
+      "ngrok-skip-browser-warning": "true"
+    }
           }
         );
 
