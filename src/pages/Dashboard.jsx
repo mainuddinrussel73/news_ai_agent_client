@@ -737,34 +737,37 @@ color: darkMode ? "#e5e7eb" : "#000",
         )}
 
         {/* ARTICLE CONTENT (PRESERVES PARAGRAPH GAP) */}
-       {/* ================= KINDLE READER MODE ================= */}
+        {/* ================= KINDLE READER (WIDE + NO INNER SCROLL) ================= */}
 <div
   id="reader-content"
   style={{
     background: darkMode ? "#0b1220" : "#faf7f2",
     color: darkMode ? "#e5e7eb" : "#1a1a1a",
-    padding: "40px 36px",
-    borderRadius: 14,
-    fontFamily:
-      "Georgia, 'Times New Roman', serif",
+
+    /* 🔥 KEY CHANGE: wider layout */
+    padding: "50px 70px",
+    maxWidth: "100%",
+    width: "100%",
+
+    /* 🔥 NO INTERNAL SCROLL */
+    overflow: "visible",
+    maxHeight: "none",
+
+    fontFamily: "Georgia, 'Times New Roman', serif",
     fontSize: fontSize || 19,
-    lineHeight: 2.05,
+    lineHeight: 2.1,
     letterSpacing: "0.2px",
     textAlign: "justify",
-    maxHeight: "70vh",
-    overflowY: "auto",
-    boxShadow: darkMode
-      ? "inset 0 0 0 1px #1f2937"
-      : "inset 0 0 0 1px #e5e7eb",
+
+    borderRadius: 14,
   }}
 >
-
-  {/* READING PULSE HEADER */}
+  {/* READING LABEL */}
   <div
     style={{
       fontSize: 12,
       opacity: 0.6,
-      marginBottom: 20,
+      marginBottom: 25,
       letterSpacing: 1,
       textTransform: "uppercase",
     }}
@@ -772,21 +775,17 @@ color: darkMode ? "#e5e7eb" : "#000",
     📖 Reading Mode
   </div>
 
-  {/* ARTICLE PARAGRAPHS */}
+  {/* ARTICLE TEXT */}
   {selected.content
     ?.split(/\n|\.\s+/)
     .filter(Boolean)
     .map((para, i) => (
       <p
         key={i}
-      style={{
-        marginBottom: 26,
-        textIndent: "18px",
-        ...(i === 0 && {
-          fontSize: fontSize + 2,
-          fontWeight: 500,
-        }),
-      }}
+        style={{
+          marginBottom: 28,
+          textIndent: "22px",
+        }}
       >
         {para.trim()}.
       </p>
