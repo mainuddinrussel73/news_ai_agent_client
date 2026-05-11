@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import io from "socket.io-client";
-
+import jsPDF from "jspdf";
+import "../NotoSansBengali";
+import html2canvas from "html2canvas";
+import { useRef } from "react";
 const API = "https://property-recycling-exes.ngrok-free.dev";
 
 const socket = io(API, {
@@ -29,6 +32,7 @@ export default function Dashboard() {
   // =====================================================
   // STATES
   // =====================================================
+const pdfRef = useRef();
 
   const [articles, setArticles] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -57,6 +61,80 @@ export default function Dashboard() {
     section: "",
     articles: 0,
   });
+
+
+  function sanitizeFileName(name = "article") {
+  return name
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "_")
+    .slice(0, 80);
+}
+async function downloadArticlePDF() {
+
+  if (!pdfRef.current) return;
+
+  const canvas = await html2canvas(
+    pdfRef.current,
+    {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+    }
+  );
+
+  const imgData = canvas.toDataURL("image/png");
+
+  const pdf = new jsPDF("p", "mm", "a4");
+
+  const pdfWidth =
+    pdf.internal.pageSize.getWidth();
+
+  const pdfHeight =
+    pdf.internal.pageSize.getHeight();
+
+  const imgWidth = pdfWidth;
+
+  const imgHeight =
+    (canvas.height * imgWidth) /
+    canvas.width;
+
+  let heightLeft = imgHeight;
+
+  let position = 0;
+
+  pdf.addImage(
+    imgData,
+    "PNG",
+    0,
+    position,
+    imgWidth,
+    imgHeight
+  );
+
+  heightLeft -= pdfHeight;
+
+  while (heightLeft > 0) {
+
+    position = heightLeft - imgHeight;
+
+    pdf.addPage();
+
+    pdf.addImage(
+      imgData,
+      "PNG",
+      0,
+      position,
+      imgWidth,
+      imgHeight
+    );
+
+    heightLeft -= pdfHeight;
+  }
+
+  pdf.save(
+    `${selected.title || "article"}.pdf`
+  );
+}
 
   // =====================================================
   // LOAD ARTICLES
@@ -698,7 +776,7 @@ export default function Dashboard() {
 
             <div
               style={{
-                padding: 40,
+                padding: 10,
               }}
             >
               <h1
@@ -740,6 +818,7 @@ export default function Dashboard() {
               {/* CONTENT */}
 
               <div
+                ref={pdfRef}
                 style={{
                   background: darkMode
                     ? "#0b1220"
@@ -1035,6 +1114,20 @@ export default function Dashboard() {
                 >
                   🔗 Read Full Article
                 </a>
+                <button
+  onClick={() => downloadArticlePDF(selected)}
+  style={{
+    padding: "10px 18px",
+    border: "none",
+    borderRadius: 12,
+    background: "#7c3aed",
+    color: "#fff",
+    cursor: "pointer",
+    fontWeight: 600,
+  }}
+>
+  ⬇ Download PDF
+</button>
               </div>
             </div>
           </div>
