@@ -57,9 +57,9 @@ const pdfRef = useRef();
     status: "idle",
     completed: 0,
     total: 0,
+    percentage: 0,
+    currentTitle: "",
     site: "",
-    section: "",
-    articles: 0,
   });
 
 
@@ -339,25 +339,90 @@ async function downloadPDF(article) {
     loadArticles();
   }, []);
 
+
+  function getArticleDate(article) {
+  const candidates = [
+    article.date,
+    article.publishedAt,
+    article.scrapedAt,
+    article.createdAt,
+  ];
+
+  for (const d of candidates) {
+    if (d && !isNaN(new Date(d))) {
+      return new Date(d);
+    }
+  }
+
+  return new Date(); // final fallback
+}
+
+
   // =====================================================
   // SOCKETS
   // =====================================================
 
-  useEffect(() => {
-    const progressHandler = (data) => {
-      setProgress(data);
+ useEffect(() => {
 
-      if (data.status === "done") {
+  function progressHandler(data) {
+
+    console.log("SOCKET PROGRESS:", data);
+
+    setProgress(prev => ({
+
+      ...prev,
+
+      ...data,
+
+      percentage:
+        data.total > 0
+          ? Math.floor(
+              (data.completed / data.total) * 100
+            )
+          : 0,
+    }));
+
+    // reload articles after scraping finishes
+    if (data.status === "done") {
+
+      setTimeout(() => {
         loadArticles();
-      }
-    };
+      }, 1000);
+    }
+  }
 
-    socket.on("progress", progressHandler);
+  // connected
+  socket.on("connect", () => {
+    console.log(
+      "Socket connected:",
+      socket.id
+    );
+  });
 
-    return () => {
-      socket.off("progress", progressHandler);
-    };
-  }, []);
+  // disconnect
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected");
+  });
+
+  // progress
+  socket.on(
+    "progress",
+    progressHandler
+  );
+
+  return () => {
+
+    socket.off(
+      "progress",
+      progressHandler
+    );
+
+    socket.off("connect");
+
+    socket.off("disconnect");
+  };
+
+}, []);
 
   // =====================================================
   // FILTERED
@@ -389,19 +454,30 @@ async function downloadPDF(article) {
   // GROUPED
   // =====================================================
 
-  const grouped = useMemo(() => {
-    return filteredArticles.reduce((acc, article) => {
-      const site = article.site || "unknown";
+  const groupedByDate = useMemo(() => {
+  const grouped = {};
 
-      if (!acc[site]) {
-        acc[site] = [];
-      }
+  filteredArticles.forEach((article) => {
+    const dateObj = getArticleDate(article);
 
-      acc[site].push(article);
+    const dateKey = dateObj.toLocaleDateString("en-GB", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
 
-      return acc;
-    }, {});
-  }, [filteredArticles]);
+    const site = article.site || "unknown";
+
+    if (!grouped[dateKey]) grouped[dateKey] = {};
+    if (!grouped[dateKey][site]) grouped[dateKey][site] = [];
+
+    grouped[dateKey][site].push(article);
+  });
+
+  return Object.entries(grouped).sort(
+    (a, b) => new Date(b[0]) - new Date(a[0])
+  );
+}, [filteredArticles]);
 
   // =====================================================
   // UI
@@ -585,6 +661,104 @@ async function downloadPDF(article) {
         />
       </div>
 
+      <div
+        style={{
+          background: "#111827",
+          borderRadius: 18,
+          padding: 24,
+          marginBottom: 30,
+        }}
+      >
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginBottom: 12,
+          }}
+        >
+          <div
+            style={{
+              fontWeight: 700,
+            }}
+          >
+            Scraper Progress
+          </div>
+
+          <div>
+            {progress.percentage || 0}%
+          </div>
+        </div>
+
+        <div
+          style={{
+            height: 14,
+            background: "#1e293b",
+            borderRadius: 999,
+            overflow: "hidden",
+            marginBottom: 16,
+          }}
+        >
+          <div
+            style={{
+              width: `${
+                progress.percentage || 0
+              }%`,
+
+              height: "100%",
+
+              background:
+                "linear-gradient(90deg,#2563eb,#38bdf8)",
+
+              transition: "0.3s ease",
+            }}
+          />
+        </div>
+
+        <div
+          style={{
+            color: "#cbd5e1",
+            fontSize: 14,
+            lineHeight: 1.8,
+          }}
+        >
+
+          <div>
+            Status:
+            {" "}
+            {progress.status}
+          </div>
+
+          <div>
+            Site:
+            {" "}
+            {progress.site}
+          </div>
+
+          <div>
+            Progress:
+            {" "}
+            {progress.completed}
+            /
+            {progress.total}
+          </div>
+
+          {progress.currentTitle && (
+            <div
+              style={{
+                marginTop: 8,
+                color: "#94a3b8",
+              }}
+            >
+              Current:
+              {" "}
+              {progress.currentTitle}
+            </div>
+          )}
+
+        </div>
+
+      </div>
       {/* LOADING */}
 
       {loading && (
@@ -600,87 +774,134 @@ async function downloadPDF(article) {
 
       {/* ARTICLES */}
 
-      {!loading &&
-        Object.keys(grouped).map((site) => (
-          <div
-            key={site}
+    {!loading &&
+  groupedByDate.map(([date, sites]) => (
+    <div key={date} style={{ marginBottom: 60 }}>
+
+      {/* DATE HEADER */}
+      <h2
+        style={{
+          marginBottom: 28,
+          fontSize: 28,
+          fontWeight: 800,
+          color: "#38bdf8",
+        }}
+      >
+        📅 {date}
+      </h2>
+
+      {/* SITES UNDER DATE */}
+      {Object.keys(sites).map((site) => (
+        <div key={site} style={{ marginBottom: 40 }}>
+
+          {/* SITE HEADER */}
+          <h3
             style={{
-              marginBottom: 50,
+              marginBottom: 18,
+              fontSize: 20,
+              fontWeight: 700,
+              color: "#e2e8f0",
+              borderLeft: "4px solid #2563eb",
+              paddingLeft: 10,
+              textTransform: "capitalize",
             }}
           >
-            <h2
-              style={{
-                marginBottom: 22,
-                textTransform: "capitalize",
-                fontSize: 26,
-              }}
-            >
-              {site}
-            </h2>
+            📰 {site}
+          </h3>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns:
-                  "repeat(auto-fill,minmax(260px,1fr))",
-                gap: 22,
-              }}
-            >
-              {grouped[site].map((article, i) => (
-                <div
-                  key={i}
-                  onClick={() => openArticle(article)}
-                  style={{
-                    background: "#111827",
-                    borderRadius: 18,
-                    overflow: "hidden",
-                    cursor: "pointer",
-                    transition: "0.2s",
-                  }}
-                >
-                  {article.image && (
-                    <img
-                      src={article.image}
-                      alt=""
-                      style={{
-                        width: "100%",
-                        height: 220,
-                        objectFit: "cover",
-                      }}
-                    />
-                  )}
+          {/* ARTICLES GRID */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fill, minmax(260px, 1fr))",
+              gap: 22,
+            }}
+          >
+            {sites[site].map((article, i) => (
+              <div
+                key={i}
+                onClick={() => openArticle(article)}
+                style={{
+                  background: "#111827",
+                  borderRadius: 18,
+                  overflow: "hidden",
+                  cursor: "pointer",
+                  transition: "0.2s",
+                }}
+              >
+                {article.image && (
+                  <img
+                    src={article.image}
+                    alt=""
+                    style={{
+                      width: "100%",
+                      height: 220,
+                      objectFit: "cover",
+                    }}
+                  />
+                )}
+
+                <div style={{ padding: 22 }}>
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      fontSize: 18,
+                      lineHeight: 1.6,
+                      marginBottom: 12,
+                    }}
+                  >
+                    {article.title}
+                  </div>
 
                   <div
                     style={{
-                      padding: 22,
+                      color: "#94a3b8",
+                      fontSize: 14,
+                      lineHeight: 1.7,
                     }}
                   >
-                    <div
-                      style={{
-                        fontWeight: 700,
-                        fontSize: 18,
-                        lineHeight: 1.6,
-                        marginBottom: 15,
-                      }}
-                    >
-                      {article.title}
-                    </div>
-
-                    <div
-                      style={{
-                        color: "#94a3b8",
-                        lineHeight: 1.7,
-                        fontSize: 14,
-                      }}
-                    >
-                      {article.summary?.slice(0, 150)}...
-                    </div>
+                    {article.summary?.slice(0, 150)}...
                   </div>
+
+  {/* META (DATE + SOURCE) */}
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: 12,
+      color: "#64748b",
+      borderTop: "1px solid #1f2937",
+      paddingTop: 10,
+    }}
+  >
+    {/* DATE */}
+    <span>
+      📅{" "}
+      {article.date
+        ? new Date(article.date).toLocaleDateString("en-GB", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })
+        : "No date"}
+    </span>
+
+    {/* SOURCE */}
+    <span style={{ textTransform: "capitalize" }}>
+      📰 {article.site || "unknown"}
+    </span>
+  </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
-        ))}
+
+        </div>
+      ))}
+
+    </div>
+  ))}
 
       {/* MODAL */}
 
