@@ -44,7 +44,7 @@ const pdfRef = useRef();
 
   const [darkMode, setDarkMode] = useState(false);
 
-  const [fontSize, setFontSize] = useState(18);
+  const [fontSize, setFontSize] = useState(12);
 
   const [aiCache, setAiCache] = useState({});
 
@@ -69,71 +69,45 @@ const pdfRef = useRef();
     .replace(/\s+/g, "_")
     .slice(0, 80);
 }
-async function downloadArticlePDF() {
+async function downloadPDF(article) {
 
-  if (!pdfRef.current) return;
+  try {
 
-  const canvas = await html2canvas(
-    pdfRef.current,
-    {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: "#ffffff",
-    }
-  );
+    const response = await fetch(
+      `${API}/api/pdf`,
+      {
+        method: "POST",
 
-  const imgData = canvas.toDataURL("image/png");
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-  const pdf = new jsPDF("p", "mm", "a4");
-
-  const pdfWidth =
-    pdf.internal.pageSize.getWidth();
-
-  const pdfHeight =
-    pdf.internal.pageSize.getHeight();
-
-  const imgWidth = pdfWidth;
-
-  const imgHeight =
-    (canvas.height * imgWidth) /
-    canvas.width;
-
-  let heightLeft = imgHeight;
-
-  let position = 0;
-
-  pdf.addImage(
-    imgData,
-    "PNG",
-    0,
-    position,
-    imgWidth,
-    imgHeight
-  );
-
-  heightLeft -= pdfHeight;
-
-  while (heightLeft > 0) {
-
-    position = heightLeft - imgHeight;
-
-    pdf.addPage();
-
-    pdf.addImage(
-      imgData,
-      "PNG",
-      0,
-      position,
-      imgWidth,
-      imgHeight
+        body: JSON.stringify({
+          article,
+        }),
+      }
     );
 
-    heightLeft -= pdfHeight;
-  }
+    const blob = await response.blob();
 
-  pdf.save(
-    `${selected.title || "article"}.pdf`
-  );
+    const url =
+      window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+
+    a.href = url;
+
+    a.download = "article.pdf";
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    a.remove();
+
+  } catch (err) {
+    console.log(err);
+  }
 }
 
   // =====================================================
@@ -766,7 +740,7 @@ async function downloadArticlePDF() {
                 alt=""
                 style={{
                   width: "100%",
-                  height: 380,
+                  height: 180,
                   objectFit: "cover",
                 }}
               />
@@ -776,7 +750,7 @@ async function downloadArticlePDF() {
 
             <div
               style={{
-                padding: 10,
+                padding: 20,
               }}
             >
               <h1
@@ -831,14 +805,13 @@ async function downloadArticlePDF() {
                   maxWidth: "900px",
                   margin: "0 auto",
 
-                  padding: "20px 28px",
+                  padding: "10px 18px",
 
                   fontFamily:
                     "Georgia, 'Times New Roman', serif",
 
                   fontSize: fontSize,
-
-                  lineHeight: 2.1,
+                  lineHeight: 1.7,
 
                   borderRadius: 14,
                 }}
@@ -1115,10 +1088,11 @@ async function downloadArticlePDF() {
                   🔗 Read Full Article
                 </a>
                 <button
-  onClick={() => downloadArticlePDF(selected)}
+  onClick={() => downloadPDF(selected)}
   style={{
     padding: "10px 18px",
     border: "none",
+    marginTop: 20,
     borderRadius: 12,
     background: "#7c3aed",
     color: "#fff",
