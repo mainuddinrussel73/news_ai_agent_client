@@ -454,11 +454,16 @@ async function downloadPDF(article) {
   // GROUPED
   // =====================================================
 
-  const groupedByDate = useMemo(() => {
+  const groupedByDateSiteSection = useMemo(() => {
   const grouped = {};
 
   filteredArticles.forEach((article) => {
-    const dateObj = getArticleDate(article);
+    const dateObj = new Date(
+      article.date ||
+      article.scrapedAt ||
+      article.createdAt ||
+      Date.now()
+    );
 
     const dateKey = dateObj.toLocaleDateString("en-GB", {
       year: "numeric",
@@ -467,13 +472,19 @@ async function downloadPDF(article) {
     });
 
     const site = article.site || "unknown";
+    const section = article.section || "general";
 
+    // init structure
     if (!grouped[dateKey]) grouped[dateKey] = {};
-    if (!grouped[dateKey][site]) grouped[dateKey][site] = [];
+    if (!grouped[dateKey][site]) grouped[dateKey][site] = {};
+    if (!grouped[dateKey][site][section]) {
+      grouped[dateKey][site][section] = [];
+    }
 
-    grouped[dateKey][site].push(article);
+    grouped[dateKey][site][section].push(article);
   });
 
+  // sort by date DESC
   return Object.entries(grouped).sort(
     (a, b) => new Date(b[0]) - new Date(a[0])
   );
@@ -775,127 +786,196 @@ async function downloadPDF(article) {
       {/* ARTICLES */}
 
     {!loading &&
-  groupedByDate.map(([date, sites]) => (
-    <div key={date} style={{ marginBottom: 60 }}>
+  groupedByDateSiteSection.map(([date, sites]) => (
+    <div key={date} 
+    
+    style={{ marginBottom: 60 }}
+    
+    >
 
       {/* DATE HEADER */}
-      <h2
-        style={{
-          marginBottom: 28,
-          fontSize: 28,
-          fontWeight: 800,
-          color: "#38bdf8",
-        }}
-      >
+      <h2 style={{
+        fontSize: 28,
+        fontWeight: 800,
+        color: "#38bdf8",
+        marginBottom: 30,
+      }}>
         📅 {date}
       </h2>
 
-      {/* SITES UNDER DATE */}
+      {/* SITES */}
       {Object.keys(sites).map((site) => (
         <div key={site} style={{ marginBottom: 40 }}>
 
-          {/* SITE HEADER */}
-          <h3
-            style={{
-              marginBottom: 18,
-              fontSize: 20,
-              fontWeight: 700,
-              color: "#e2e8f0",
-              borderLeft: "4px solid #2563eb",
-              paddingLeft: 10,
-              textTransform: "capitalize",
-            }}
-          >
+          <h3 style={{
+            fontSize: 20,
+            fontWeight: 700,
+            marginBottom: 18,
+            color: "#e2e8f0",
+            borderLeft: "4px solid #2563eb",
+            paddingLeft: 10,
+          }}>
             📰 {site}
           </h3>
 
-          {/* ARTICLES GRID */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fill, minmax(260px, 1fr))",
-              gap: 22,
-            }}
-          >
-            {sites[site].map((article, i) => (
-              <div
-                key={i}
-                onClick={() => openArticle(article)}
-                style={{
-                  background: "#111827",
-                  borderRadius: 18,
-                  overflow: "hidden",
-                  cursor: "pointer",
-                  transition: "0.2s",
-                }}
-              >
-                {article.image && (
-                  <img
-                    src={article.image}
-                    alt=""
-                    style={{
-                      width: "100%",
-                      height: 220,
-                      objectFit: "cover",
-                    }}
-                  />
-                )}
+          {/* SECTIONS */}
+          {Object.keys(sites[site]).map((section) => (
+            <div key={section} style={{ marginBottom: 30 }}>
 
-                <div style={{ padding: 22 }}>
+              <h4 style={{
+                fontSize: 16,
+                fontWeight: 600,
+                marginBottom: 15,
+                color: "#94a3b8",
+              }}>
+                📂 {section}
+              </h4>
+
+              {/* ARTICLES GRID */}
+              <div 
+              
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "repeat(auto-fill, minmax(260px, 1fr))",
+                gap: 22,
+              }}>
+
+                {sites[site][section].map((article, i) => (
                   <div
-                    style={{
-                      fontWeight: 700,
-                      fontSize: 18,
-                      lineHeight: 1.6,
-                      marginBottom: 12,
-                    }}
-                  >
-                    {article.title}
-                  </div>
+  key={i}
+  onClick={() => openArticle(article)}
+  style={{
+    background: "#0f172a",
+    borderRadius: 16,
+    overflow: "hidden",
+    cursor: "pointer",
+    border: "1px solid #1f2937",
+    transition: "all 0.25s ease",
+    boxShadow: "0 0 0 rgba(0,0,0,0)",
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.transform = "translateY(-4px)";
+    e.currentTarget.style.boxShadow =
+      "0 10px 25px rgba(0,0,0,0.35)";
+    e.currentTarget.style.borderColor = "#2563eb";
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.transform = "translateY(0)";
+    e.currentTarget.style.boxShadow = "none";
+    e.currentTarget.style.borderColor = "#1f2937";
+  }}
+>
+  {/* IMAGE */}
+  {article.image && (
+    <div style={{ position: "relative" }}>
+      <img
+        src={article.image}
+        alt=""
+        style={{
+          width: "100%",
+          height: 200,
+          objectFit: "cover",
+        }}
+      />
 
-                  <div
-                    style={{
-                      color: "#94a3b8",
-                      fontSize: 14,
-                      lineHeight: 1.7,
-                    }}
-                  >
-                    {article.summary?.slice(0, 150)}...
-                  </div>
+      {/* PAPER BADGE */}
+      <div
+        style={{
+          position: "absolute",
+          top: 10,
+          left: 10,
+          background: "rgba(0,0,0,0.65)",
+          color: "#fff",
+          fontSize: 11,
+          padding: "4px 8px",
+          borderRadius: 8,
+          textTransform: "capitalize",
+          backdropFilter: "blur(6px)",
+        }}
+      >
+        📰 {article.site}
+      </div>
 
-  {/* META (DATE + SOURCE) */}
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "space-between",
-      fontSize: 12,
-      color: "#64748b",
-      borderTop: "1px solid #1f2937",
-      paddingTop: 10,
-    }}
-  >
-    {/* DATE */}
-    <span>
-      📅{" "}
-      {article.date
-        ? new Date(article.date).toLocaleDateString("en-GB", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          })
-        : "No date"}
-    </span>
+      {/* DATE BADGE */}
+      <div
+        style={{
+          position: "absolute",
+          top: 10,
+          right: 10,
+          background: "rgba(37,99,235,0.9)",
+          color: "#fff",
+          fontSize: 11,
+          padding: "4px 8px",
+          borderRadius: 8,
+        }}
+      >
+        📅{" "}
+        {article.date
+          ? new Date(article.date).toLocaleDateString(
+              "en-GB",
+              {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              }
+            )
+          : "N/A"}
+      </div>
+    </div>
+  )}
 
-    {/* SOURCE */}
-    <span style={{ textTransform: "capitalize" }}>
-      📰 {article.site || "unknown"}
-    </span>
+  {/* CONTENT */}
+  <div style={{ padding: 18 }}>
+
+    {/* TITLE */}
+    <div
+      style={{
+        fontSize: 16,
+        fontWeight: 700,
+        lineHeight: 1.5,
+        color: "#f8fafc",
+        marginBottom: 10,
+      }}
+    >
+      {article.title}
+    </div>
+
+    {/* SUMMARY */}
+    <div
+      style={{
+        fontSize: 13,
+        color: "#94a3b8",
+        lineHeight: 1.6,
+        marginBottom: 12,
+      }}
+    >
+      {article.summary?.slice(0, 130)}...
+    </div>
+
+    {/* FOOTER META */}
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        fontSize: 11,
+        color: "#64748b",
+        borderTop: "1px solid #1f2937",
+        paddingTop: 10,
+      }}
+    >
+      <span>📂 {article.section || "general"}</span>
+      <span>🔗 Read more</span>
+    </div>
+
   </div>
-                </div>
+</div>
+                ))}
+
               </div>
-            ))}
-          </div>
+
+            </div>
+          ))}
 
         </div>
       ))}
