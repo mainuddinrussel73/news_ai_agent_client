@@ -16,6 +16,8 @@ const socket = io(API, {
 
 const PAPERS = [
   "prothomalo",
+  "dailystarbangla",
+  "thebusinessstandardbangla",
   "bonikbarta",
   "bbc",
   "bdnews24",
@@ -741,9 +743,8 @@ async function downloadPDF(article) {
           </div>
 
           <div>
-            Site:
-            {" "}
-            {progress.site}
+              Site: {progress.site?.name || "unknown"}
+
           </div>
 
           <div>
